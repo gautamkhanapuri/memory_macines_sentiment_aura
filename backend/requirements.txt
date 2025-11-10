@@ -1,0 +1,5 @@
+# requirements
+fastapi[standard]
+dotenv
+httpx
+pydantic
