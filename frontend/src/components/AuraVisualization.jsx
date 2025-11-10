@@ -36,8 +36,8 @@ function AuraVisualization({ sentiment, keywords }) {
                 currentSentiment = p.lerp(currentSentiment, sentimentRef.current, 0.05);
 
                 // Map sentiment to color
-                let bgColor = getSentimentColor(currentSentiment, 0.02);
-                p.background(bgColor[0], bgColor[1], bgColor[2], 15);
+                let bgColor = getSentimentColor(currentSentiment, 0.05);
+                p.background(bgColor[0], bgColor[1], bgColor[2], 25);
 
                 // Update flow field based on Perlin noise
                 let yoff = 0;
@@ -133,9 +133,9 @@ function AuraVisualization({ sentiment, keywords }) {
                 }
 
                 show(p5Instance, sentiment) {
-                    let color = getSentimentColor(sentiment, 0.5);
+                    let color = getSentimentColor(sentiment, 0.8);
                     p5Instance.stroke(color[0], color[1], color[2], color[3]);
-                    p5Instance.strokeWeight(1);
+                    p5Instance.strokeWeight(2);
                     p5Instance.line(this.pos.x, this.pos.y, this.prevPos.x, this.prevPos.y);
                     this.updatePrev();
                 }
