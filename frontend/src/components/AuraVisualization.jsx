@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import p5 from 'p5';
 
-function AuraVisualization({ sentiment, keywords }) {
+function AuraVisualization({ sentiment }) {
     const canvasRef = useRef(null);
     const p5InstanceRef = useRef(null);
     const sentimentRef = useRef(0);
@@ -26,7 +26,7 @@ function AuraVisualization({ sentiment, keywords }) {
                 flowField = new Array(cols * rows);
 
                 // Create particles
-                for (let i = 0; i < 500; i++) {
+                for (let i = 0; i < 2500; i++) {
                     particles.push(new Particle(p));
                 }
             };
@@ -36,8 +36,8 @@ function AuraVisualization({ sentiment, keywords }) {
                 currentSentiment = p.lerp(currentSentiment, sentimentRef.current, 0.05);
 
                 // Map sentiment to color
-                let bgColor = getSentimentColor(currentSentiment, 0.05);
-                p.background(bgColor[0], bgColor[1], bgColor[2], 25);
+                let bgColor = getSentimentColor(currentSentiment, 0.04);
+                p.background(bgColor[0], bgColor[1], bgColor[2], 20);
 
                 // Update flow field based on Perlin noise
                 let yoff = 0;
@@ -82,17 +82,57 @@ function AuraVisualization({ sentiment, keywords }) {
                 if (sentiment < 0) {
                     let t = p.map(sentiment, -1, 0, 0, 1);
                     return [
-                        p.lerp(150, 0, t),
-                        p.lerp(80, 200, t),
-                        p.lerp(255, 150, t),
+                        p.lerp(80, 20, t),
+                        p.lerp(40, 150, t),
+                        p.lerp(200, 120, t),
                         alpha * 255
                     ];
                 } else {
                     let t = p.map(sentiment, 0, 1, 0, 1);
                     return [
-                        p.lerp(0, 255, t),
+                        p.lerp(20, 220, t),
+                        p.lerp(150, 100, t),
+                        p.lerp(120, 20, t),
+                        alpha * 255
+                    ];
+                }
+            }
+
+            function getParticleColor(sentiment, alpha = 1) {
+                if (sentiment < -0.5) {
+                    // Very negative - use BRIGHT cyan/white (contrasts with dark blue bg)
+                    let t = p.map(sentiment, -1, -0.5, 0, 1);
+                    return [
+                        p.lerp(150, 200, t),  // Bright cyan
+                        p.lerp(200, 220, t),
+                        p.lerp(255, 240, t),
+                        alpha * 255
+                    ];
+                } else if (sentiment < 0) {
+                    // Slightly negative - purple/blue but bright
+                    let t = p.map(sentiment, -0.5, 0, 0, 1);
+                    return [
+                        p.lerp(200, 100, t),
+                        p.lerp(220, 200, t),
+                        p.lerp(240, 200, t),
+                        alpha * 255
+                    ];
+                } else if (sentiment < 0.5) {
+                    // Neutral to slightly positive - bright teal/cyan
+                    let t = p.map(sentiment, 0, 0.5, 0, 1);
+                    return [
+                        p.lerp(100, 255, t),
+                        p.lerp(200, 220, t),
                         p.lerp(200, 150, t),
-                        p.lerp(150, 50, t),
+                        alpha * 255
+                    ];
+                } else {
+                    // Very positive - use BRIGHT yellow/white (contrasts with dark orange bg)
+                    let t = p.map(sentiment, 0.5, 1, 0, 1);
+                    return [
+                        p.lerp(255, 255, t),  // Bright yellow to white
+                        p.lerp(220, 240, t),
+                        p.lerp(150, 200, t),
                         alpha * 255
                     ];
                 }
@@ -107,7 +147,7 @@ function AuraVisualization({ sentiment, keywords }) {
                     );
                     this.vel = p5Instance.createVector(0, 0);
                     this.acc = p5Instance.createVector(0, 0);
-                    this.maxSpeed = 2;
+                    this.maxSpeed = 1;
                     this.prevPos = this.pos.copy();
                 }
 
@@ -133,7 +173,7 @@ function AuraVisualization({ sentiment, keywords }) {
                 }
 
                 show(p5Instance, sentiment) {
-                    let color = getSentimentColor(sentiment, 0.8);
+                    let color = getParticleColor(sentiment, 0.9);
                     p5Instance.stroke(color[0], color[1], color[2], color[3]);
                     p5Instance.strokeWeight(2);
                     p5Instance.line(this.pos.x, this.pos.y, this.prevPos.x, this.prevPos.y);
