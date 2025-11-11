@@ -6,7 +6,7 @@ import KeywordsDisplay from './components/KeywordsDisplay';
 import Controls from './components/Controls';
 import axios from 'axios';
 
-const DEEPGRAM_API_KEY = process.env.REACT_APP_DEEPGRAM_API_KEY; // Add this
+const DEEPGRAM_API_KEY = process.env.REACT_APP_DEEPGRAM_API_KEY || 'TEMP_KEY';
 const BACKEND_URL = 'http://localhost:8000';
 
 function App() {
@@ -19,6 +19,38 @@ function App() {
   const mediaRecorderRef = useRef(null);
   const socketRef = useRef(null);
   const streamRef = useRef(null);
+
+  useEffect(() => {
+    if (error === null) {
+      return () => {
+        console.log("error is null, nothing to do");
+      };
+    }
+    // Set a timeout to hide the error after
+    const timer = setTimeout(() => {
+      setError(null);
+    }, 2000);
+
+    // Clean up the timer when the error display is done.
+    return () => clearTimeout(timer);
+  }, [error]);
+
+  useEffect(() => {
+    // Check the backend health when recording is started
+    if (isRecording){
+      axios.get(`${BACKEND_URL}/health`) // Update the user the status
+          .then(response => {
+            setError("Sentiment Analysis is " + response.data.status + "!");
+          })
+          .catch(error => {
+            setError("Sentiment Analysis is unreachable!");
+          });
+    }
+    // return function to cleanup the effect.
+    return () => {
+      console.log("Nothing to clean after isrecording change!");
+    };
+  }, [isRecording]);
 
   // Start recording and transcription
   const startRecording = async () => {
@@ -71,10 +103,12 @@ function App() {
           if (isFinal && transcriptText.trim().length > 5) {
             try {
               const response = await axios.post(`${BACKEND_URL}/process_text`, {
-                text: transcriptText
+                text: transcriptText,
+                timeout: 5000
               });
 
               setSentiment(response.data.sentiment);
+              // setError("Got a valid response: " + response.data.keywords.length);
               setKeywords(prevKeywords => {
                 // Add new keywords, keep last 10
                 const newKeywords = response.data.keywords.map(kw => ({
@@ -120,6 +154,7 @@ function App() {
       streamRef.current.getTracks().forEach(track => track.stop());
     }
     setIsRecording(false);
+    // setError("Closing Transcription connection gracefully!");
   };
 
   // Cleanup on unmount
