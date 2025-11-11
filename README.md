@@ -11,10 +11,10 @@ Email: khanapuri.g@northeastern.edu
 
 This application captures audio input, transcribes it in real-time, analyzes sentiment using AI, 
 and displays the results through a dynamic Perlin noise visualization that responds to the 
-emotional tone of speech. Use the version present in `blob` branch (best version version with UI 
+emotional tone of speech. Use the version present in `main` branch (best version version with UI 
 polish). 
 ```bash
-git switch blob
+git switch main
 ```
 
 ## Tech Stack
