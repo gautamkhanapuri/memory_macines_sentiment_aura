@@ -6,6 +6,7 @@ import os
 from dotenv import load_dotenv
 import httpx
 import json
+# import time
 
 # Load environment variables
 load_dotenv()
@@ -108,6 +109,9 @@ async def process_text(request: TextRequest):
 
         # Parse the AI's JSON response
         parsed = json.loads(ai_response)
+        # print(json.dumps(parsed, indent=2))
+        # To simulate timeout in the frontend
+        # time.sleep(5.5)
 
         return SentimentResponse(
             sentiment=float(parsed.get("sentiment_score", 0.0)),
@@ -133,7 +137,7 @@ async def process_text(request: TextRequest):
 async def health_check():
     """Health check endpoint"""
     return {
-        "status": "healthy",
+        "status": "healthy" if bool(GROQ_API_KEY) else "not healthy",
         "groq_api_configured": bool(GROQ_API_KEY)
     }
 
