@@ -6,6 +6,7 @@ import os
 from dotenv import load_dotenv
 import httpx
 import json
+# import time
 
 # Load environment variables
 load_dotenv()
@@ -15,7 +16,7 @@ app = FastAPI(title="Sentiment Aura Backend")
 # CORS - allow frontend to call this API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your frontend URL
+    allow_origins=["*"],  # In prod, specify your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -59,7 +60,6 @@ async def process_text(request: TextRequest):
         raise HTTPException(status_code=500, detail="GROQ_API_KEY not configured")
 
     try:
-        # Construct the prompt for the LLM
         system_prompt = """You are a sentiment and keyword extraction system.
             Analyze the given text and return ONLY a valid JSON object with this exact structure:
             {
@@ -75,7 +75,7 @@ async def process_text(request: TextRequest):
 
         user_prompt = f"Text to analyze: {request.text}"
 
-        # Call Groq API
+        # Async Groq API call
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.post(
                 GROQ_API_URL,
@@ -84,12 +84,12 @@ async def process_text(request: TextRequest):
                     "Content-Type": "application/json"
                 },
                 json={
-                    "model": "llama-3.3-70b-versatile",  # Fast and accurate
+                    "model": "llama-3.3-70b-versatile",
                     "messages": [
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_prompt}
                     ],
-                    "temperature": 0.3,  # Lower = more consistent
+                    "temperature": 0.3,
                     "max_tokens": 200
                 }
             )
@@ -99,7 +99,7 @@ async def process_text(request: TextRequest):
         groq_data = response.json()
         ai_response = groq_data["choices"][0]["message"]["content"]
 
-        # Extract JSON from response (sometimes LLMs add extra text)
+        # Extract JSON from response
         ai_response = ai_response.strip()
         if "```json" in ai_response:
             ai_response = ai_response.split("```json")[1].split("```")[0].strip()
@@ -108,6 +108,9 @@ async def process_text(request: TextRequest):
 
         # Parse the AI's JSON response
         parsed = json.loads(ai_response)
+        # print(json.dumps(parsed, indent=2))
+        # To simulate timeout in the frontend
+        # time.sleep(5.5)
 
         return SentimentResponse(
             sentiment=float(parsed.get("sentiment_score", 0.0)),
@@ -133,7 +136,7 @@ async def process_text(request: TextRequest):
 async def health_check():
     """Health check endpoint"""
     return {
-        "status": "healthy",
+        "status": "healthy" if bool(GROQ_API_KEY) else "not healthy",
         "groq_api_configured": bool(GROQ_API_KEY)
     }
 
