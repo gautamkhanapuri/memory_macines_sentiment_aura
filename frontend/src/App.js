@@ -7,6 +7,8 @@ import Controls from './components/Controls';
 import axios from 'axios';
 
 const DEEPGRAM_API_KEY = process.env.REACT_APP_DEEPGRAM_API_KEY || 'TEMP_KEY';
+// const DEEPGRAM_API_KEY = 'TEMP_KEY'; // For testing what happens when there's a Deepgram
+// connection error.
 const BACKEND_URL = 'http://localhost:8000';
 
 function App() {
@@ -107,13 +109,15 @@ function App() {
                 timeout: 5000
               });
 
-              setSentiment(response.data.sentiment);
+              const currentSentiment = response.data.sentiment; // Store current sentiment
+              setSentiment(currentSentiment);
               // setError("Got a valid response: " + response.data.keywords.length);
               setKeywords(prevKeywords => {
                 // Add new keywords, keep last 10
                 const newKeywords = response.data.keywords.map(kw => ({
                   text: kw,
-                  id: Date.now() + Math.random()
+                  id: Date.now() + Math.random(),
+                  sentiment: currentSentiment
                 }));
                 return [...prevKeywords, ...newKeywords].slice(-10);
               });
@@ -127,7 +131,7 @@ function App() {
 
       socket.onerror = (error) => {
         console.error('WebSocket error:', error);
-        setError('Transcription connection error');
+        setError('Transcription connection error. Try again in sometime.');
       };
 
       socket.onclose = () => {
