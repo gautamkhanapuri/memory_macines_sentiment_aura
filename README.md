@@ -9,7 +9,13 @@ Email: khanapuri.g@northeastern.edu
 
 ## Overview
 
-This application captures audio input, transcribes it in real-time, analyzes sentiment using AI, and displays the results through a dynamic Perlin noise visualization that responds to the emotional tone of speech.
+This application captures audio input, transcribes it in real-time, analyzes sentiment using AI, 
+and displays the results through a dynamic Perlin noise visualization that responds to the 
+emotional tone of speech. Use the version present in `blob` branch (best version version with UI 
+polish). 
+```bash
+git switch blob
+```
 
 ## Tech Stack
 
@@ -28,6 +34,11 @@ This application captures audio input, transcribes it in real-time, analyzes sen
 ### External APIs
 - Deepgram - Real-time speech-to-text transcription
 - Groq (Llama 3.3 70B) - Sentiment analysis and keyword extraction
+
+### Version Control
+- Git, GitHub
+- Branching
+- Tagging
 
 ## How to run:
 
@@ -115,15 +126,19 @@ Backend processes transcribed text through Groq's LLM to extract:
 ### Dynamic Visualization
 Perlin noise field with 500 particles that respond to sentiment:
 - Color: Blue/purple for negative, green/teal for neutral, orange/yellow for positive
-- Motion: Intensity and speed increase with stronger emotional content
+- Motion: Intensity and speed increase with stronger emotional content. Particle count, hue and 
+  speed adjusted for visual serenity.
 - Smooth transitions between emotional states
+- Smooth fade in and fade out of audio waveform.
 
 ### UI Polish
 - Semi-transparent panels with glassmorphism effect
 - Typewriter effect for transcript display
 - Staggered fade-in animation for keywords
+- Keywords highlighted with sentiment appropriate hues and border colors.
 - Audio feedback on button clicks
 - Automatic scrolling for long transcripts and keyword lists
+- Radial audio visualizer added for UI polish and better user experience and engagement
 
 ## Architecture
 
@@ -139,8 +154,10 @@ Data flows from microphone through Deepgram WebSocket, displays as transcript, s
 
 - Microphone permission errors with user-friendly messages
 - WebSocket reconnection logic for transcription failures
+- Graceful handling of Backend failures such as not reachable, timeout or error response.
 - Backend timeout handling for slow API responses
 - Graceful degradation if sentiment analysis fails
+- Health check of all APIs at the time of recording with appropriate notification to the user.
 
 ## Observations
 
@@ -150,5 +167,4 @@ Data flows from microphone through Deepgram WebSocket, displays as transcript, s
 ## Future Enhancements
 
 Potential improvements I can think of include:
-- Audio amplitude visualization
 - Export transcript functionality
